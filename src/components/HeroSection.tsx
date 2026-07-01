@@ -126,10 +126,10 @@ export default function HeroSection() {
         >
           <div
             style={{
-              width: 36,
+              width: 150,
               height: 36,
               borderRadius: 10,
-              border: "1.5px solid #39FF14",
+              border: "1.2px solid #39FF14",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -140,15 +140,15 @@ export default function HeroSection() {
             <span
               style={{
                 fontWeight: 900,
-                fontSize: "0.75rem",
+                fontSize: "1rem",
                 color: "#39FF14",
                 letterSpacing: "-0.03em",
               }}
             >
-              BG
+              Bezliab Graphics
             </span>
           </div>
-          <span
+          {/* <span
             style={{
               fontSize: "0.65rem",
               letterSpacing: "0.35em",
@@ -157,7 +157,7 @@ export default function HeroSection() {
             }}
           >
             BEZLIAB GRAPHICS
-          </span>
+          </span> */}
         </motion.div>
 
         {/* ── Giant title ── */}
@@ -176,23 +176,8 @@ export default function HeroSection() {
               letterSpacing: "0.03em",
             }}
           >
-            My
+            Isaac's
           </motion.span>
-
-          <motion.div
-            initial={{ opacity: 0, x: -28 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.26 }}
-            style={{
-              fontSize: "clamp(1.2rem,2.6vw,1.9rem)",
-              fontWeight: 700,
-              letterSpacing: "0.4em",
-              color: "rgba(255,255,255,0.85)",
-              marginTop: "-6px",
-            }}
-          >
-            2 0 2 6
-          </motion.div>
 
           <motion.h1
             initial={{ opacity: 0, y: 36 }}
@@ -457,23 +442,6 @@ export default function HeroSection() {
             }}
           />
         </motion.div>
-
-        {/* ── Scrolling sections label ── */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 1.0 }}
-          style={{
-            textAlign: "center",
-            letterSpacing: "0.44em",
-            fontSize: "0.66rem",
-            fontWeight: 600,
-            color: "rgba(255,255,255,0.3)",
-            marginBottom: "1.2rem",
-          }}
-        >
-          SCROLLING SECTIONS
-        </motion.p>
 
         {/* ── Nav pills — 4 + 3 grid ── */}
         <motion.div
