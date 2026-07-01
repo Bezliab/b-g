@@ -1,0 +1,76 @@
+# ─────────────────────────────────────────
+# BEZLIAB GRAPHICS — NEXT.JS .gitignore
+# ─────────────────────────────────────────
+
+# ── Dependencies ──────────────────────────
+node_modules/
+.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# ── Next.js build output ──────────────────
+.next/
+out/
+build/
+dist/
+
+# ── Environment variables (NEVER commit) ──
+.env
+.env.local
+.env.development
+.env.development.local
+.env.test
+.env.test.local
+.env.production
+.env.production.local
+*.env
+
+# ── Vercel deployment ─────────────────────
+.vercel
+
+# ── TypeScript ────────────────────────────
+*.tsbuildinfo
+next-env.d.ts
+
+# ── Package manager locks (keep one only) ─
+# Uncomment to ignore if using yarn or pnpm:
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# ── Debug & logs ──────────────────────────
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+logs/
+
+# ── OS generated files ────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ── Editor & IDE ──────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.history/
+
+# ── Testing ───────────────────────────────
+coverage/
+.nyc_output/
+*.lcov
+
+# ── Misc ──────────────────────────────────
+*.pem
+.cache/
+.temp/
+.tmp/
