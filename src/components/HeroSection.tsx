@@ -1,6 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import { useEffect, useRef } from "react";
+import SoftwareCarousel from "./SoftwareCarousel";
 
 const navItems = [
   { label: "ABOUT ME", href: "#intro" },
@@ -244,166 +245,10 @@ export default function HeroSection() {
                   filter: "blur(28px)",
                 }}
               />
-              {/* Creative design tools illustration */}
-              <svg
-                viewBox="0 0 420 370"
-                className="absolute inset-0 w-full h-full"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                {/* Pentagon/Bezier shape backdrop */}
-                <path
-                  d="M 210 30 L 370 120 L 340 290 L 80 290 L 50 120 Z"
-                  fill="rgba(57,255,20,0.04)"
-                  stroke="rgba(57,255,20,0.12)"
-                  strokeWidth="1.5"
-                />
-                {/* Pen tool icon */}
-                <g transform="translate(140, 80)">
-                  <path
-                    d="M 0 100 L 30 0 L 60 100 Z"
-                    fill="none"
-                    stroke="#39FF14"
-                    strokeWidth="2.5"
-                    strokeLinejoin="round"
-                  />
-                  <path d="M 10 70 L 50 70" stroke="#39FF14" strokeWidth="2" />
-                  <circle cx="30" cy="0" r="5" fill="#39FF14" opacity="0.8" />
-                  <circle cx="0" cy="100" r="4" fill="rgba(57,255,20,0.5)" />
-                  <circle cx="60" cy="100" r="4" fill="rgba(57,255,20,0.5)" />
-                </g>
-                {/* Brush strokes */}
-                <path
-                  d="M 230 60 Q 310 80 340 150 Q 360 200 320 240"
-                  stroke="rgba(57,255,20,0.45)"
-                  strokeWidth="3.5"
-                  fill="none"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M 245 55 Q 325 75 355 145 Q 375 195 335 235"
-                  stroke="rgba(57,255,20,0.15)"
-                  strokeWidth="6"
-                  fill="none"
-                  strokeLinecap="round"
-                />
-                {/* Color palette dots */}
-                {[
-                  "#39FF14",
-                  "#19F5A5",
-                  "#ffffff",
-                  "rgba(255,255,255,0.3)",
-                  "rgba(57,255,20,0.4)",
-                ].map((col, i) => (
-                  <circle
-                    key={i}
-                    cx={80 + i * 28}
-                    cy={240}
-                    r="11"
-                    fill={col}
-                    stroke="rgba(255,255,255,0.1)"
-                    strokeWidth="1"
-                  />
-                ))}
-                {/* Typography lines */}
-                <text
-                  x="80"
-                  y="300"
-                  fontFamily="Arial"
-                  fontWeight="900"
-                  fontSize="38"
-                  fill="rgba(255,255,255,0.06)"
-                  letterSpacing="-1"
-                >
-                  DESIGN
-                </text>
-                <text
-                  x="80"
-                  y="338"
-                  fontFamily="Arial"
-                  fontWeight="900"
-                  fontSize="38"
-                  fill="rgba(57,255,20,0.08)"
-                  letterSpacing="-1"
-                >
-                  VISUAL
-                </text>
-                {/* Grid lines */}
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <line
-                    key={`h${i}`}
-                    x1="40"
-                    y1={130 + i * 30}
-                    x2="380"
-                    y2={130 + i * 30}
-                    stroke="rgba(255,255,255,0.025)"
-                    strokeWidth="0.8"
-                  />
-                ))}
-                {[0, 1, 2, 3, 4, 5].map((i) => (
-                  <line
-                    key={`v${i}`}
-                    x1={60 + i * 60}
-                    y1="50"
-                    x2={60 + i * 60}
-                    y2="340"
-                    stroke="rgba(255,255,255,0.025)"
-                    strokeWidth="0.8"
-                  />
-                ))}
-                {/* Neon accent circle */}
-                <circle
-                  cx="300"
-                  cy="170"
-                  r="50"
-                  fill="none"
-                  stroke="rgba(57,255,20,0.18)"
-                  strokeWidth="1"
-                  strokeDasharray="6 4"
-                />
-                <circle cx="300" cy="170" r="35" fill="rgba(57,255,20,0.06)" />
-                <text
-                  x="300"
-                  y="177"
-                  textAnchor="middle"
-                  fontFamily="Arial"
-                  fontWeight="900"
-                  fontSize="18"
-                  fill="#39FF14"
-                  opacity="0.7"
-                >
-                  Ps
-                </text>
-                {/* Small tool badges */}
-                {[
-                  { x: 90, y: 145, t: "Ai", c: "#ff9a00" },
-                  { x: 130, y: 155, t: "Pr", c: "#9999ff" },
-                  { x: 170, y: 148, t: "Ae", c: "#9999ff" },
-                ].map((b) => (
-                  <g key={b.t} transform={`translate(${b.x},${b.y})`}>
-                    <rect
-                      x="-14"
-                      y="-14"
-                      width="28"
-                      height="28"
-                      rx="6"
-                      fill="#111"
-                      stroke={b.c}
-                      strokeWidth="1"
-                    />
-                    <text
-                      x="0"
-                      y="5"
-                      textAnchor="middle"
-                      fontFamily="Arial"
-                      fontWeight="900"
-                      fontSize="9"
-                      fill={b.c}
-                    >
-                      {b.t}
-                    </text>
-                  </g>
-                ))}
-              </svg>
+              {/* 3D coverflow carousel of software icons */}
+              <div className="absolute inset-0">
+                <SoftwareCarousel />
+              </div>
             </div>
           </motion.div>
         </div>
