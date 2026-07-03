@@ -45,9 +45,8 @@ const tools = [
 
 const stats = [
   { n: "5+", label: "Videos Edited" },
-  { n: "5★", label: "Client Rating" },
+  { n: "★★★★★", label: "Client Rating" },
   { n: "1+", label: "Years Experience" },
-  { n: "24h", label: "Turnaround" },
 ];
 
 function PlayButton({ onClick }: { onClick: () => void }) {

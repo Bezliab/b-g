@@ -12,14 +12,62 @@ type App = {
 };
 
 const APPS: App[] = [
-  { id: "ps", name: "Photoshop", short: "Ps", bg: "linear-gradient(155deg,#001b30,#00304f)", accent: "#31A8FF" },
-  { id: "ai", name: "Illustrator", short: "Ai", bg: "linear-gradient(155deg,#2e1400,#4a2200)", accent: "#FF9A00" },
-  { id: "fi", name: "Figma", short: "Fi", bg: "linear-gradient(155deg,#191919,#242424)", accent: "#A259FF" },
-  { id: "ae", name: "After Effects", short: "Ae", bg: "linear-gradient(155deg,#0c0033,#1a0060)", accent: "#9999FF" },
-  { id: "cd", name: "CorelDRAW", short: "Cd", bg: "linear-gradient(155deg,#052008,#0a3a10)", accent: "#3ED84B" },
-  { id: "ca", name: "Canva", short: "Ca", bg: "linear-gradient(155deg,#04292b,#1a0c3d)", accent: "#00C4CC" },
-  { id: "cc", name: "CapCut", short: "Cc", bg: "linear-gradient(155deg,#0a0a0a,#161616)", accent: "#00E5FF" },
-  { id: "cp", name: "PHOTO-PAINT", short: "Cp", bg: "linear-gradient(155deg,#031f0e,#063a1c)", accent: "#39FF14" },
+  {
+    id: "ps",
+    name: "Photoshop",
+    short: "PS",
+    bg: "linear-gradient(155deg,#001b30,#00304f)",
+    accent: "#31A8FF",
+  },
+  {
+    id: "ai",
+    name: "Illustrator",
+    short: "AI",
+    bg: "linear-gradient(155deg,#2e1400,#4a2200)",
+    accent: "#FF9A00",
+  },
+  {
+    id: "fi",
+    name: "Figma",
+    short: "FI",
+    bg: "linear-gradient(155deg,#191919,#242424)",
+    accent: "#A259FF",
+  },
+  {
+    id: "ae",
+    name: "After Effects",
+    short: "AE",
+    bg: "linear-gradient(155deg,#0c0033,#1a0060)",
+    accent: "#9999FF",
+  },
+  {
+    id: "cd",
+    name: "CorelDRAW",
+    short: "CD",
+    bg: "linear-gradient(155deg,#052008,#0a3a10)",
+    accent: "#3ED84B",
+  },
+  {
+    id: "ca",
+    name: "Canva",
+    short: "CA",
+    bg: "linear-gradient(155deg,#04292b,#1a0c3d)",
+    accent: "#00C4CC",
+  },
+  {
+    id: "cc",
+    name: "CapCut",
+    short: "CC",
+    bg: "linear-gradient(155deg,#0a0a0a,#161616)",
+    accent: "#00E5FF",
+  },
+  {
+    id: "cp",
+    name: "PHOTO-PAINT",
+    short: "CP",
+    bg: "linear-gradient(155deg,#031f0e,#063a1c)",
+    accent: "#39FF14",
+  },
 ];
 
 const N_APPS = APPS.length;
@@ -105,7 +153,11 @@ export default function SoftwareCarousel() {
         speedTargetRef.current = 1;
       }
       // ease the speed multiplier itself so accel/decel is smooth, never abrupt
-      speedFactorRef.current = lerp(speedFactorRef.current, speedTargetRef.current, 1 - Math.pow(0.001, dt));
+      speedFactorRef.current = lerp(
+        speedFactorRef.current,
+        speedTargetRef.current,
+        1 - Math.pow(0.001, dt),
+      );
 
       tRef.current += speedRef.current * speedFactorRef.current * dt;
 
@@ -161,7 +213,10 @@ export default function SoftwareCarousel() {
         const z = f * 90 - absOff * 30;
         const rotY = Math.max(-34, Math.min(34, off * -7));
         const floatY = Math.sin(now / 900 + j) * 3 * f;
-        const opacity = Math.max(0, Math.min(1, 1.15 - absOff / (visRange + 0.3)));
+        const opacity = Math.max(
+          0,
+          Math.min(1, 1.15 - absOff / (visRange + 0.3)),
+        );
 
         el.style.opacity = String(opacity);
         el.style.pointerEvents = absOff < visRange ? "auto" : "none";
@@ -169,13 +224,27 @@ export default function SoftwareCarousel() {
         el.style.width = `${baseTile}px`;
         el.style.height = `${baseTile}px`;
         el.style.zIndex = String(1000 - Math.round(absOff * 10));
-        el.style.filter = f > 0.94 ? "brightness(1.18)" : `brightness(${(0.75 + f * 0.35).toFixed(2)})`;
+        el.style.filter =
+          f > 0.94
+            ? "brightness(1.18)"
+            : `brightness(${(0.75 + f * 0.35).toFixed(2)})`;
 
         if (glow) {
           const accent = app.accent;
           const glowStrength = f;
-          glow.style.boxShadow = `0 0 ${8 + glowStrength * 34}px ${glowStrength * 0.55}px ${accent}${Math.round(glowStrength * 90 + 20).toString(16).padStart(2, "0")}, 0 0 ${18 + glowStrength * 55}px rgba(57,255,20,${(glowStrength * 0.35).toFixed(2)})`;
-          glow.style.borderColor = `${accent}${Math.round(50 + glowStrength * 130).toString(16).padStart(2, "0")}`;
+          glow.style.boxShadow = `0 0 ${8 + glowStrength * 34}px ${glowStrength * 0.55}px ${accent}${Math.round(
+            glowStrength * 90 + 20,
+          )
+            .toString(16)
+            .padStart(
+              2,
+              "0",
+            )}, 0 0 ${18 + glowStrength * 55}px rgba(57,255,20,${(glowStrength * 0.35).toFixed(2)})`;
+          glow.style.borderColor = `${accent}${Math.round(
+            50 + glowStrength * 130,
+          )
+            .toString(16)
+            .padStart(2, "0")}`;
           glow.style.borderWidth = glowStrength > 0.7 ? "1.6px" : "1px";
         }
       }
