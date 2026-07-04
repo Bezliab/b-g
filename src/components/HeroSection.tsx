@@ -149,16 +149,6 @@ export default function HeroSection() {
               Bezliab Graphics
             </span>
           </div>
-          {/* <span
-            style={{
-              fontSize: "0.65rem",
-              letterSpacing: "0.35em",
-              color: "rgba(255,255,255,0.38)",
-              fontWeight: 600,
-            }}
-          >
-            BEZLIAB GRAPHICS
-          </span> */}
         </motion.div>
 
         {/* ── Giant title ── */}
