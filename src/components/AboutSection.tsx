@@ -110,7 +110,7 @@ export default function AboutSection() {
                 style={{ border: "1px solid rgba(255,255,255,0.07)" }}
               >
                 <Image
-                  src="/images/me.jpg"
+                  src="/images/me.png"
                   alt="Isaac — Bezliab Graphics"
                   fill
                   style={{ objectFit: "cover", objectPosition: "top center" }}
