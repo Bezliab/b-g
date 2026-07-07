@@ -161,15 +161,31 @@ export default function AboutSection() {
               </div>
 
               {/* Who AM I heading */}
-              <div className="mb-5">
-                <div className="flex items-baseline gap-2 flex-wrap">
+              <div className="mb-5 relative" style={{ paddingBottom: 4 }}>
+                {/* Glowing semi-circle arc behind "AM I?" — matches reference */}
+                <div
+                  className="absolute pointer-events-none"
+                  style={{
+                    left: "clamp(60px,18%,110px)",
+                    top: "-6px",
+                    width: "clamp(120px,32%,190px)",
+                    height: "clamp(60px,16%,95px)",
+                    borderRadius: "999px 999px 0 0",
+                    background:
+                      "linear-gradient(180deg, rgba(57,255,20,0.08), transparent 70%)",
+                    borderBottom: "2px solid rgba(57,255,20,0.75)",
+                    boxShadow:
+                      "0 8px 24px rgba(57,255,20,0.45), 0 2px 8px rgba(57,255,20,0.6)",
+                  }}
+                />
+                <div className="relative flex items-baseline gap-2 flex-wrap">
                   <span
                     style={{
-                      fontFamily: "Georgia,serif",
+                      fontFamily: "'Brush Script MT', 'Segoe Script', cursive",
                       fontStyle: "italic",
-                      fontWeight: 300,
-                      fontSize: "clamp(1.3rem,2.8vw,2rem)",
-                      color: "rgba(255,255,255,0.62)",
+                      fontWeight: 400,
+                      fontSize: "clamp(1.6rem,3.6vw,2.6rem)",
+                      color: "rgba(255,255,255,0.85)",
                     }}
                   >
                     Who
@@ -186,6 +202,7 @@ export default function AboutSection() {
                   </span>
                 </div>
                 <div
+                  className="relative"
                   style={{
                     height: "2px",
                     width: "68px",
@@ -219,6 +236,35 @@ export default function AboutSection() {
                 </span>
               </h2>
 
+              {/* Tool badges — inline row on mobile/tablet, sits in normal
+                  flow so it never overlaps the bio text below */}
+              <div className="flex lg:hidden flex-wrap gap-2.5 mb-5">
+                {tools.map((t) => (
+                  <motion.div
+                    key={t.label}
+                    whileHover={{ scale: 1.1, y: -2 }}
+                    title={t.label}
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: "50%",
+                      background: t.bg,
+                      border: `1.5px solid ${t.color}66`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "0.64rem",
+                      fontWeight: 800,
+                      color: t.color,
+                      cursor: "pointer",
+                      boxShadow: `0 0 10px ${t.color}33`,
+                    }}
+                  >
+                    {t.label}
+                  </motion.div>
+                ))}
+              </div>
+
               {/* Bio */}
               <p
                 className="mb-5"
@@ -227,6 +273,8 @@ export default function AboutSection() {
                   lineHeight: 1.78,
                   color: "rgba(255,255,255,0.52)",
                   maxWidth: "470px",
+                  borderLeft: "2px solid rgba(57,255,20,0.4)",
+                  paddingLeft: "14px",
                 }}
               >
                 A passionate graphic designer with over{" "}
@@ -272,27 +320,28 @@ export default function AboutSection() {
                 ))}
               </div>
 
-              {/* Tool badges — right side */}
-              <div className="absolute right-6 top-24 flex flex-col gap-2.5">
+              {/* Tool badges — absolute column, large screens only, where
+                  the card is wide enough to leave clear space beside the text */}
+              <div className="hidden lg:flex absolute right-6 top-24 flex-col gap-3">
                 {tools.map((t) => (
                   <motion.div
                     key={t.label}
                     whileHover={{ scale: 1.12, y: -2 }}
                     title={t.label}
                     style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 9,
+                      width: 44,
+                      height: 44,
+                      borderRadius: "50%",
                       background: t.bg,
-                      border: `1px solid ${t.color}44`,
+                      border: `1.5px solid ${t.color}66`,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      fontSize: "0.72rem",
+                      fontSize: "0.74rem",
                       fontWeight: 800,
                       color: t.color,
                       cursor: "pointer",
-                      boxShadow: `0 0 10px ${t.color}22`,
+                      boxShadow: `0 0 12px ${t.color}33`,
                     }}
                   >
                     {t.label}

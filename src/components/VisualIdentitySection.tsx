@@ -128,43 +128,46 @@ export default function VisualIdentitySection() {
             className="relative rounded-2xl overflow-hidden mb-8 card-lift"
             style={{ border: "1px solid rgba(42,58,255,0.2)" }}
           >
-            <div className="relative h-72 md:h-96">
+            <div className="relative h-56 md:h-96">
               <Image
                 src="/images/aptswap-biz-1.jpg"
                 alt="AptSwap Brand"
                 fill
                 style={{ objectFit: "cover" }}
               />
-              <div
-                className="absolute inset-0"
+            </div>
+            {/* Caption sits below the image, on a solid background —
+                the image already contains its own "AptSwap" wordmark, so
+                overlaying matching text on top of it caused a double-text
+                clash once the crop changed on smaller screens. */}
+            <div
+              className="p-6 md:p-8"
+              style={{
+                background: "linear-gradient(180deg,#0a0a34,#08082a)",
+                borderTop: "1px solid rgba(42,58,255,0.15)",
+              }}
+            >
+              <h2
                 style={{
-                  background:
-                    "linear-gradient(to bottom, transparent 40%, rgba(8,8,42,0.9) 100%)",
+                  fontSize: "clamp(1.5rem,4vw,3rem)",
+                  fontWeight: 900,
+                  color: "white",
+                  letterSpacing: "-0.03em",
+                  lineHeight: 1,
                 }}
-              />
-              <div className="absolute bottom-0 left-0 right-0 p-8">
-                <h2
-                  style={{
-                    fontSize: "clamp(1.5rem,4vw,3rem)",
-                    fontWeight: 900,
-                    color: "white",
-                    letterSpacing: "-0.03em",
-                    lineHeight: 1,
-                  }}
-                >
-                  AptSwap
-                </h2>
-                <p
-                  style={{
-                    fontSize: "0.72rem",
-                    color: "rgba(255,255,255,0.5)",
-                    marginTop: 6,
-                    letterSpacing: "0.12em",
-                  }}
-                >
-                  YOUR TRUSTED BRAND SINCE 2010 · FINTECH IDENTITY SYSTEM
-                </p>
-              </div>
+              >
+                AptSwap
+              </h2>
+              <p
+                style={{
+                  fontSize: "0.72rem",
+                  color: "rgba(255,255,255,0.5)",
+                  marginTop: 6,
+                  letterSpacing: "0.12em",
+                }}
+              >
+                YOUR TRUSTED BRAND SINCE 2010 · FINTECH IDENTITY SYSTEM
+              </p>
             </div>
           </motion.div>
 

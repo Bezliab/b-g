@@ -152,7 +152,7 @@ export default function HeroSection() {
         </motion.div>
 
         {/* ── Giant title ── */}
-        <div className="relative" style={{ minHeight: "480px" }}>
+        <div className="relative md:min-h-[480px]">
           <motion.span
             initial={{ opacity: 0, y: -18 }}
             animate={{ opacity: 1, y: 0 }}
@@ -211,12 +211,15 @@ export default function HeroSection() {
             }}
           />
 
-          {/* ── Abstract creative element (design tools graphic) ── */}
+          {/* ── Software carousel ──
+              Mobile: sits in normal flow *below* the title, so it can never
+              land on top of "Portfolio". Desktop (md+): switches to an
+              absolute overlay in the top-right, as originally designed. */}
           <motion.div
-            initial={{ opacity: 0, x: 55, scale: 0.9 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
+            initial={{ opacity: 0, y: 24, scale: 0.94 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.95, delay: 0.5 }}
-            className="absolute top-0 right-0"
+            className="relative mt-10 mx-auto md:absolute md:top-0 md:right-0 md:mt-0 md:mx-0"
             style={{ width: "clamp(240px,40%,460px)" }}
           >
             <div
