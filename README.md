@@ -1,38 +1,37 @@
 # Bezliab Graphics — Portfolio 2026
-### Waseem Zafar · Graphic Designer
 
-A pixel-faithful recreation of the [Waseem Zafar Behance Portfolio 2026](https://www.behance.net/gallery/250683873/Portfolio-2026) as a modern, responsive, interactive website.
+### Graphic Designer
 
 ---
 
 ## ✦ Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Framework | Next.js 14 (App Router) |
-| Language | TypeScript |
-| Styling | Tailwind CSS |
-| Animations | Framer Motion |
-| Icons | Lucide React |
-| Fonts | Inter (Google Fonts) |
+| Layer      | Technology              |
+| ---------- | ----------------------- |
+| Framework  | Next.js 14 (App Router) |
+| Language   | TypeScript              |
+| Styling    | Tailwind CSS            |
+| Animations | Framer Motion           |
+| Icons      | Lucide React            |
+| Fonts      | Inter (Google Fonts)    |
 
 ---
 
 ## ✦ Sections
 
-| # | Section | Description |
-|---|---------|-------------|
-| 1 | **Hero** | Giant "My 2026 Portfolio" title, animated chameleon, neon-green glow, 6 nav pills |
-| 2 | **About / Intro** | Designer portrait, glassmorphism "Who AM I?" card, skill badges, QR codes, contact |
-| 3 | **Logofolio** | 12-logo icon grid, brand name row, animated green marquee ticker |
-| 4 | **Visual Identity 01 — Velmora** | Black water brand system: logo anatomy, variations, color palette, typeface |
-| 5 | **Visual Identity 02 — GlideX** | Fitness treadmill brand: logo breakdown, lifestyle mockups, palette |
-| 6 | **Social Media Designs** | 12 × Instagram post mockups (Grilledwich, Tuborg, boAt, Titan, Diptyque…) |
-| 7 | **Packaging 01 — AUREL** | SPF 50+ sunscreen packaging on dark-blue ocean background |
-| 8 | **Packaging 02 — Chhawal Chips** | Three chip flavours with full flat dieline layouts |
-| 9 | **Print / Catalogue — Pololac** | Electric scooter spiral catalogue mockups |
-| 10 | **Event Identity — Design Next 2026** | Full brand system: logo, colors, typography, patterns, billboard & merch mockups |
-| 11 | **Footer / Thanks** | "Thanks For Scrolling" card, QR codes, social links, Behance stats |
+| #   | Section                               | Description                                                                        |
+| --- | ------------------------------------- | ---------------------------------------------------------------------------------- |
+| 1   | **Hero**                              | Giant "My 2026 Portfolio" title, animated chameleon, neon-green glow, 6 nav pills  |
+| 2   | **About / Intro**                     | Designer portrait, glassmorphism "Who AM I?" card, skill badges, QR codes, contact |
+| 3   | **Logofolio**                         | 12-logo icon grid, brand name row, animated green marquee ticker                   |
+| 4   | **Visual Identity 01 — Velmora**      | Black water brand system: logo anatomy, variations, color palette, typeface        |
+| 5   | **Visual Identity 02 — GlideX**       | Fitness treadmill brand: logo breakdown, lifestyle mockups, palette                |
+| 6   | **Social Media Designs**              | 12 × Instagram post mockups (Grilledwich, Tuborg, boAt, Titan, Diptyque…)          |
+| 7   | **Packaging 01 — AUREL**              | SPF 50+ sunscreen packaging on dark-blue ocean background                          |
+| 8   | **Packaging 02 — Chhawal Chips**      | Three chip flavours with full flat dieline layouts                                 |
+| 9   | **Print / Catalogue — Pololac**       | Electric scooter spiral catalogue mockups                                          |
+| 10  | **Event Identity — Design Next 2026** | Full brand system: logo, colors, typography, patterns, billboard & merch mockups   |
+| 11  | **Footer / Thanks**                   | "Thanks For Scrolling" card, QR codes, social links, Behance stats                 |
 
 ---
 
@@ -138,45 +137,44 @@ Replace SVG placeholders with actual asset images by:
 import Image from "next/image";
 
 <Image
-  src="/images/waseem-portrait.jpg"
-  alt="Waseem Zafar"
+  src="/images/me.jpg"
+  alt="Adeniji Isaac"
   width={380}
   height={520}
   className="object-cover rounded-2xl"
   priority
-/>
+/>;
 ```
 
 ---
 
 ## ✦ Responsive Breakpoints
 
-| Screen | Behaviour |
-|--------|-----------|
-| Mobile `< 768px` | Single column, smaller type, hamburger menu |
-| Tablet `768–1024px` | 2-column grids, scaled proportions |
-| Desktop `> 1024px` | Full PDF-accurate layout |
+| Screen              | Behaviour                                   |
+| ------------------- | ------------------------------------------- |
+| Mobile `< 768px`    | Single column, smaller type, hamburger menu |
+| Tablet `768–1024px` | 2-column grids, scaled proportions          |
+| Desktop `> 1024px`  | Full PDF-accurate layout                    |
 
 ---
 
 ## ✦ Animation Reference
 
-| Animation | Trigger | Component |
-|-----------|---------|-----------|
-| Particle float | On load | `HeroSection` canvas |
-| Title fade-up | Page load | `HeroSection` h1 |
-| Card slide-in | Scroll into view | All sections |
-| Marquee scroll | Continuous | `LogofolioSection` |
-| Glow pulse | CSS | Nav active indicator |
-| Loading bar | On mount | `LoadingScreen` |
-| Scroll progress | Scroll | `Navigation` |
-| Mobile menu open | Click | `Navigation` |
+| Animation        | Trigger          | Component            |
+| ---------------- | ---------------- | -------------------- |
+| Particle float   | On load          | `HeroSection` canvas |
+| Title fade-up    | Page load        | `HeroSection` h1     |
+| Card slide-in    | Scroll into view | All sections         |
+| Marquee scroll   | Continuous       | `LogofolioSection`   |
+| Glow pulse       | CSS              | Nav active indicator |
+| Loading bar      | On mount         | `LoadingScreen`      |
+| Scroll progress  | Scroll           | `Navigation`         |
+| Mobile menu open | Click            | `Navigation`         |
 
 ---
 
 ## ✦ Credits
 
-**Design:** Waseem Zafar  
-**Original Portfolio:** [Behance](https://www.behance.net/gallery/250683873/Portfolio-2026)  
+**Design:** Waseem Zafar
 **Web Recreation:** Bezliab Graphics  
 **Tools used in original:** Adobe Photoshop · Illustrator · Corel Draw
