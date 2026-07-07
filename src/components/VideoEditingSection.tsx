@@ -1,9 +1,502 @@
 "use client";
-import { motion } from "framer-motion";
-import { useInView } from "framer-motion";
-import { useRef, useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 
-const services = [
+/* ─────────────────────────────────────────────────────────────
+   VIDEO DATA
+   ─ src:      local file in public/videos/
+   ─ driveUrl: Google Drive share link  (any format – auto-parsed)
+   ─ aspect:   "9:16" | "16:9" | "1:1"
+   ───────────────────────────────────────────────────────────── */
+const VIDEOS = [
+  {
+    id: "v1",
+    title: "Social Media Reel",
+    category: "Social Media",
+    client: "Client Work",
+    src: "/videos/reel-01.mp4",
+    poster: "/videos/reel-01-thumb.jpg",
+    duration: "0:48",
+    tags: ["Reel", "Social Media", "Vertical"],
+    aspect: "9:16" as const,
+  },
+  /* ── Add more videos below ─────────────────────────────────
+  {
+    id:       "v2",
+    title:    "Brand Highlight Film",
+    category: "Brand Film",
+    client:   "Client Name",
+    driveUrl: "https://drive.google.com/file/d/YOUR_FILE_ID/view",
+    duration: "2:30",
+    tags:     ["Brand", "Highlight"],
+    aspect:   "16:9" as const,
+  },
+  {
+    id:       "v3",
+    title:    "Event Recap",
+    category: "Event",
+    client:   "Client Name",
+    src:      "/videos/event-01.mp4",
+    poster:   "/videos/event-01-thumb.jpg",
+    duration: "1:15",
+    tags:     ["Event", "Recap"],
+    aspect:   "16:9" as const,
+  },
+  ─────────────────────────────────────────────────────────── */
+] as const;
+
+type VideoItem = (typeof VIDEOS)[number];
+type AspectRatio = "9:16" | "16:9" | "1:1";
+
+/* ─── Helpers ─────────────────────────────────────────────── */
+function driveEmbedUrl(url: string): string {
+  const m = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  return m ? `https://drive.google.com/file/d/${m[1]}/preview` : url;
+}
+
+function videoSrc(v: VideoItem): string | null {
+  if ("src" in v && v.src) return v.src;
+  if ("driveUrl" in v && (v as { driveUrl?: string }).driveUrl)
+    return driveEmbedUrl((v as { driveUrl: string }).driveUrl);
+  return null;
+}
+function isDrive(v: VideoItem): boolean {
+  return !("src" in v) || !v.src;
+}
+
+const CAT_COLORS: Record<string, string> = {
+  "Social Media": "#39FF14",
+  "Brand Film": "#19F5A5",
+  Event: "#ff9a00",
+  Highlight: "#9999ff",
+  Reel: "#00c4cc",
+};
+
+/* ─── Play button ─────────────────────────────────────────── */
+function PlayBtn({
+  glow = "#39FF14",
+  size = 60,
+}: {
+  glow?: string;
+  size?: number;
+}) {
+  return (
+    <div
+      style={{
+        width: size,
+        height: size,
+        borderRadius: "50%",
+        border: `2px solid ${glow}`,
+        background: `rgba(4,4,4,0.75)`,
+        backdropFilter: "blur(6px)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        boxShadow: `0 0 20px ${glow}55, 0 0 48px ${glow}22`,
+        flexShrink: 0,
+      }}
+    >
+      <svg
+        width={size * 0.35}
+        height={size * 0.35}
+        viewBox="0 0 24 24"
+        fill={glow}
+      >
+        <polygon points="6,4 20,12 6,20" />
+      </svg>
+    </div>
+  );
+}
+
+/* ─── Video card ──────────────────────────────────────────── */
+function VideoCard({ v, onPlay }: { v: VideoItem; onPlay: () => void }) {
+  const isVertical = v.aspect === "9:16";
+  const catColor = CAT_COLORS[v.category] ?? "#39FF14";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.55 }}
+      whileHover={{ y: -6 }}
+      onClick={onPlay}
+      style={{
+        position: "relative",
+        borderRadius: 16,
+        overflow: "hidden",
+        cursor: "pointer",
+        background: "rgba(255,255,255,0.03)",
+        border: "1px solid rgba(255,255,255,0.07)",
+        boxShadow: "0 4px 24px rgba(0,0,0,0.5)",
+        transition: "border-color 0.3s ease, box-shadow 0.3s ease",
+        aspectRatio: isVertical ? "9/16" : "16/9",
+        maxWidth: isVertical ? 280 : "100%",
+        width: "100%",
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.borderColor = `${catColor}55`;
+        (e.currentTarget as HTMLElement).style.boxShadow =
+          `0 0 32px ${catColor}22, 0 8px 40px rgba(0,0,0,0.7)`;
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.borderColor =
+          "rgba(255,255,255,0.07)";
+        (e.currentTarget as HTMLElement).style.boxShadow =
+          "0 4px 24px rgba(0,0,0,0.5)";
+      }}
+    >
+      {/* Thumbnail / poster */}
+      {"poster" in v && v.poster ? (
+        <Image
+          src={v.poster}
+          alt={v.title}
+          fill
+          style={{ objectFit: "cover" }}
+        />
+      ) : (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: `linear-gradient(135deg,rgba(57,255,20,0.06),rgba(4,4,4,0.9))`,
+          }}
+        />
+      )}
+
+      {/* Dark overlay */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "linear-gradient(to top,rgba(4,4,4,0.92) 0%,rgba(4,4,4,0.3) 50%,rgba(4,4,4,0.15) 100%)",
+        }}
+      />
+
+      {/* Duration badge — top right */}
+      {"duration" in v && v.duration && (
+        <div
+          style={{
+            position: "absolute",
+            top: 12,
+            right: 12,
+            padding: "3px 9px",
+            borderRadius: 20,
+            background: "rgba(4,4,4,0.75)",
+            backdropFilter: "blur(6px)",
+            fontSize: "0.6rem",
+            fontWeight: 600,
+            color: "rgba(255,255,255,0.7)",
+            border: "1px solid rgba(255,255,255,0.1)",
+          }}
+        >
+          {v.duration}
+        </div>
+      )}
+
+      {/* Category badge — top left */}
+      <div
+        style={{
+          position: "absolute",
+          top: 12,
+          left: 12,
+          padding: "3px 9px",
+          borderRadius: 20,
+          background: `${catColor}22`,
+          backdropFilter: "blur(6px)",
+          fontSize: "0.58rem",
+          fontWeight: 700,
+          color: catColor,
+          border: `1px solid ${catColor}44`,
+          letterSpacing: "0.08em",
+        }}
+      >
+        {v.category}
+      </div>
+
+      {/* Centered play button */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <motion.div whileHover={{ scale: 1.12 }} whileTap={{ scale: 0.95 }}>
+          <PlayBtn glow={catColor} size={isVertical ? 56 : 68} />
+        </motion.div>
+      </div>
+
+      {/* Bottom info */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          padding: "14px 16px 14px",
+        }}
+      >
+        <p
+          style={{
+            fontSize: "clamp(0.78rem,1.4vw,0.92rem)",
+            fontWeight: 700,
+            color: "white",
+            marginBottom: 6,
+            letterSpacing: "-0.01em",
+            lineHeight: 1.2,
+          }}
+        >
+          {v.title}
+        </p>
+        {"client" in v && v.client && (
+          <p
+            style={{
+              fontSize: "0.62rem",
+              color: "rgba(255,255,255,0.45)",
+              marginBottom: 7,
+            }}
+          >
+            {v.client}
+          </p>
+        )}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+          {v.tags.map((t) => (
+            <span
+              key={t}
+              style={{
+                fontSize: "0.52rem",
+                padding: "2px 8px",
+                borderRadius: 10,
+                background: "rgba(255,255,255,0.07)",
+                color: "rgba(255,255,255,0.45)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                letterSpacing: "0.06em",
+              }}
+            >
+              {t}
+            </span>
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+/* ─── Modal player ────────────────────────────────────────── */
+function VideoModal({ v, onClose }: { v: VideoItem; onClose: () => void }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const isVert = v.aspect === "9:16";
+  const isDriveV = isDrive(v);
+  const src = videoSrc(v);
+
+  /* lock scroll */
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, []);
+
+  /* ESC key */
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose]);
+
+  /* auto-play local video */
+  useEffect(() => {
+    if (videoRef.current && !isDriveV) {
+      videoRef.current.play().catch(() => {});
+    }
+  }, [isDriveV]);
+
+  const modalW = isVert ? "min(380px, 92vw)" : "min(900px, 94vw)";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.22 }}
+      onClick={onClose}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 9999,
+        background: "rgba(4,4,4,0.88)",
+        backdropFilter: "blur(14px)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "20px",
+      }}
+    >
+      {/* Player container */}
+      <motion.div
+        initial={{ scale: 0.88, opacity: 0, y: 24 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.88, opacity: 0, y: 24 }}
+        transition={{ type: "spring", stiffness: 320, damping: 28 }}
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          position: "relative",
+          width: modalW,
+          borderRadius: 18,
+          overflow: "hidden",
+          boxShadow:
+            "0 0 80px rgba(57,255,20,0.18), 0 32px 80px rgba(0,0,0,0.8)",
+          border: "1px solid rgba(57,255,20,0.15)",
+          background: "#080808",
+        }}
+      >
+        {/* Close button */}
+        <motion.button
+          whileHover={{ scale: 1.1, background: "rgba(57,255,20,0.15)" }}
+          whileTap={{ scale: 0.95 }}
+          onClick={onClose}
+          style={{
+            position: "absolute",
+            top: 12,
+            right: 12,
+            zIndex: 10,
+            width: 36,
+            height: 36,
+            borderRadius: "50%",
+            border: "1px solid rgba(255,255,255,0.2)",
+            background: "rgba(4,4,4,0.8)",
+            backdropFilter: "blur(8px)",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "rgba(255,255,255,0.8)",
+            fontSize: "1rem",
+            transition: "background 0.2s ease",
+          }}
+          aria-label="Close video"
+        >
+          ✕
+        </motion.button>
+
+        {/* ── Video player ── */}
+        {isDriveV && src ? (
+          /* Google Drive iframe */
+          <iframe
+            src={src}
+            allow="autoplay; encrypted-media"
+            allowFullScreen
+            style={{
+              width: "100%",
+              aspectRatio:
+                v.aspect === "9:16"
+                  ? "9/16"
+                  : v.aspect === "1:1"
+                    ? "1/1"
+                    : "16/9",
+              display: "block",
+              border: "none",
+            }}
+          />
+        ) : src ? (
+          /* Local MP4 */
+          <video
+            ref={videoRef}
+            src={src}
+            controls
+            playsInline
+            preload="auto"
+            {...("poster" in v && v.poster ? { poster: v.poster } : {})}
+            style={{
+              width: "100%",
+              aspectRatio:
+                v.aspect === "9:16"
+                  ? "9/16"
+                  : v.aspect === "1:1"
+                    ? "1/1"
+                    : "16/9",
+              display: "block",
+              background: "#000",
+            }}
+          />
+        ) : (
+          <div
+            style={{
+              padding: 48,
+              textAlign: "center",
+              color: "rgba(255,255,255,0.4)",
+            }}
+          >
+            Video not available
+          </div>
+        )}
+
+        {/* Bottom info strip */}
+        <div
+          style={{
+            padding: "14px 18px",
+            background: "rgba(4,4,4,0.95)",
+            borderTop: "1px solid rgba(255,255,255,0.06)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 8,
+          }}
+        >
+          <div>
+            <p
+              style={{
+                fontSize: "0.82rem",
+                fontWeight: 700,
+                color: "white",
+                marginBottom: 2,
+              }}
+            >
+              {v.title}
+            </p>
+            <p
+              style={{
+                fontSize: "0.62rem",
+                color: "rgba(255,255,255,0.38)",
+                letterSpacing: "0.06em",
+              }}
+            >
+              {"client" in v ? v.client : ""} · {v.category}
+            </p>
+          </div>
+          <div style={{ display: "flex", gap: 5 }}>
+            {v.tags.map((t) => (
+              <span
+                key={t}
+                style={{
+                  fontSize: "0.52rem",
+                  padding: "3px 9px",
+                  borderRadius: 10,
+                  background: "rgba(57,255,20,0.08)",
+                  color: "rgba(57,255,20,0.7)",
+                  border: "1px solid rgba(57,255,20,0.2)",
+                  letterSpacing: "0.06em",
+                }}
+              >
+                {t}
+              </span>
+            ))}
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+/* ─── Supporting content data ─────────────────────────────── */
+const SERVICES = [
   {
     icon: "🎬",
     title: "Brand Films",
@@ -12,12 +505,12 @@ const services = [
   {
     icon: "✂️",
     title: "Short-Form Reels",
-    desc: "Scroll-stopping Instagram and TikTok reels optimised for engagement and virality.",
+    desc: "Scroll-stopping Instagram and TikTok reels optimised for engagement and maximum reach.",
   },
   {
     icon: "🎞️",
     title: "Motion Graphics",
-    desc: "Dynamic animated titles, transitions, and lower thirds that elevate any video production.",
+    desc: "Dynamic animated titles, lower thirds, and transitions that elevate any video production.",
   },
   {
     icon: "📣",
@@ -26,390 +519,204 @@ const services = [
   },
   {
     icon: "🎵",
-    title: "Music Sync & Audio",
-    desc: "Expert audio mixing, music synchronisation, and sound design for maximum emotional impact.",
+    title: "Music Sync",
+    desc: "Expert audio mixing, music synchronisation, and sound design for emotional impact.",
   },
   {
     icon: "📱",
-    title: "Social Media Videos",
-    desc: "Platform-optimised video content for Facebook, Instagram, YouTube, and X/Twitter.",
+    title: "Social Videos",
+    desc: "Platform-optimised video content for Facebook, Instagram, YouTube, and X.",
   },
 ];
 
-const tools = [
-  { label: "V", name: "Veed", color: "#9999ff", bg: "#1b1450" },
+const TOOLS = [
+  { label: "Pr", name: "Premiere Pro", color: "#9999ff", bg: "#1b1450" },
   { label: "Ae", name: "After Effects", color: "#9999ff", bg: "#0d0a30" },
-  { label: "CC", name: "Capcut", color: "#ffa040", bg: "#2a1200" },
+  { label: "CC", name: "CapCut", color: "#ffa040", bg: "#2a1200" },
   { label: "Ca", name: "Canva Video", color: "#00c4cc", bg: "#001a1b" },
 ];
 
-const stats = [
+const STATS = [
   { n: "5+", label: "Videos Edited" },
-  { n: "★★★★★", label: "Client Rating" },
-  { n: "1+", label: "Years Experience" },
+  { n: "5★", label: "Client Rating" },
+  { n: "2+", label: "Years Experience" },
+  { n: "100%", label: "Satisfaction" },
 ];
 
-function PlayButton({ onClick }: { onClick: () => void }) {
-  return (
-    <button onClick={onClick} className="play-btn" aria-label="Play showreel">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="#39FF14">
-        <polygon points="8,5 19,12 8,19" />
-      </svg>
-    </button>
-  );
-}
-
+/* ─── Main section ────────────────────────────────────────── */
 export default function VideoEditingSection() {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-60px" });
-  const [playing, setPlaying] = useState(false);
+  const [activeVideo, setActiveVideo] = useState<VideoItem | null>(null);
+
+  const open = useCallback((v: VideoItem) => setActiveVideo(v), []);
+  const close = useCallback(() => setActiveVideo(null), []);
 
   return (
     <section
       id="video-editing"
-      ref={ref}
       className="relative overflow-hidden"
       style={{ background: "#040404" }}
     >
-      <div className="absolute inset-0 bg-grid opacity-60 pointer-events-none" />
+      <div className="absolute inset-0 bg-grid opacity-55 pointer-events-none" />
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse at 50% 25%, rgba(57,255,20,0.07) 0%, transparent 55%)",
+        }}
+      />
 
-      {/* Deep cinematic glow */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(ellipse at 50% 30%, rgba(57,255,20,0.08) 0%, transparent 55%)",
-        }}
-      />
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(ellipse at 20% 80%, rgba(25,245,165,0.05) 0%, transparent 45%)",
-        }}
-      />
+      {/* ── Modal ── */}
+      <AnimatePresence>
+        {activeVideo && <VideoModal v={activeVideo} onClose={close} />}
+      </AnimatePresence>
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 py-24">
-        {/* Section header */}
+        {/* ── Header ── */}
         <motion.div
           initial={{ opacity: 0, y: 18 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6 }}
-          className="flex items-center gap-3 mb-4"
+          style={{ marginBottom: "clamp(2rem,4vw,3.5rem)" }}
         >
-          <span
-            style={{
-              fontFamily: "Georgia,serif",
-              fontStyle: "italic",
-              fontWeight: 300,
-              fontSize: "clamp(1.1rem,2.2vw,1.6rem)",
-              color: "rgba(255,255,255,0.48)",
-            }}
-          >
-            Video
-          </span>
-          <span
-            style={{
-              fontSize: "clamp(1.1rem,2.2vw,1.6rem)",
-              fontWeight: 900,
-              letterSpacing: "-0.02em",
-              color: "#fff",
-            }}
-          >
-            Editing
-          </span>
-          <span
-            style={{
-              fontSize: "clamp(1.1rem,2.2vw,1.6rem)",
-              fontWeight: 900,
-              letterSpacing: "-0.02em",
-              color: "#39FF14",
-              textShadow: "0 0 16px rgba(57,255,20,0.5)",
-            }}
-          >
-            &amp; Motion
-          </span>
-          <div
-            style={{
-              flex: 1,
-              height: "1px",
-              background: "rgba(255,255,255,0.07)",
-              marginLeft: 8,
-            }}
-          />
-        </motion.div>
-
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={inView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.6, delay: 0.12 }}
-          style={{
-            fontSize: "clamp(0.8rem,1.5vw,1rem)",
-            color: "rgba(255,255,255,0.38)",
-            maxWidth: 580,
-            marginBottom: "4rem",
-            lineHeight: 1.7,
-          }}
-        >
-          Beyond static graphics — I bring brands to life through movement,
-          rhythm, and cinematic storytelling. From church event recaps to brand
-          launch films.
-        </motion.p>
-
-        {/* ── Showreel hero ── */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.96 }}
-          animate={inView ? { opacity: 1, scale: 1 } : {}}
-          transition={{ duration: 0.85, delay: 0.18 }}
-          className="relative rounded-2xl overflow-hidden mb-16"
-          style={{
-            border: "1px solid rgba(57,255,20,0.12)",
-            boxShadow:
-              "0 0 60px rgba(57,255,20,0.06), 0 24px 80px rgba(0,0,0,0.7)",
-            aspectRatio: "16/7",
-          }}
-        >
-          {/* Film frame background */}
-          <div
-            className="absolute inset-0"
-            style={{ background: "linear-gradient(135deg,#0a0a0a,#111a0a)" }}
-          />
-
-          {/* Film strip top */}
-          <div
-            className="absolute top-0 left-0 right-0 h-8 flex items-center"
-            style={{ background: "#111" }}
-          >
-            {Array.from({ length: 28 }).map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  width: 18,
-                  height: 14,
-                  borderRadius: 2,
-                  border: "1.5px solid #222",
-                  marginLeft: 6,
-                  flexShrink: 0,
-                  background: "#1a1a1a",
-                }}
-              />
-            ))}
-          </div>
-          {/* Film strip bottom */}
-          <div
-            className="absolute bottom-0 left-0 right-0 h-8 flex items-center"
-            style={{ background: "#111" }}
-          >
-            {Array.from({ length: 28 }).map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  width: 18,
-                  height: 14,
-                  borderRadius: 2,
-                  border: "1.5px solid #222",
-                  marginLeft: 6,
-                  flexShrink: 0,
-                  background: "#1a1a1a",
-                }}
-              />
-            ))}
-          </div>
-
-          {/* Main content area */}
-          <div className="absolute inset-x-0 top-8 bottom-8 flex flex-col items-center justify-center gap-6">
-            {/* Timeline visualization */}
-            <div className="w-full max-w-2xl px-8">
-              {[
-                {
-                  label: "VIDEO TRACK",
-                  color: "#39FF14",
-                  clips: [0.05, 0.28, 0.5, 0.72, 0.88],
-                },
-                {
-                  label: "AUDIO TRACK",
-                  color: "#19F5A5",
-                  clips: [0.02, 0.22, 0.45, 0.68, 0.85],
-                },
-                {
-                  label: "GRAPHICS",
-                  color: "#9999ff",
-                  clips: [0.1, 0.38, 0.6, 0.78],
-                },
-                {
-                  label: "COLOR GRADE",
-                  color: "#ff9a00",
-                  clips: [0, 0.3, 0.55, 0.8],
-                },
-              ].map((track, ti) => (
-                <div key={track.label} className="flex items-center gap-3 mb-2">
-                  <span
-                    style={{
-                      fontSize: "0.42rem",
-                      letterSpacing: "0.1em",
-                      color: "rgba(255,255,255,0.3)",
-                      width: 58,
-                      textAlign: "right",
-                      flexShrink: 0,
-                    }}
-                  >
-                    {track.label}
-                  </span>
-                  <div
-                    className="flex-1 relative h-5"
-                    style={{
-                      background: "rgba(255,255,255,0.04)",
-                      borderRadius: 3,
-                    }}
-                  >
-                    {track.clips.map((start, ci) => (
-                      <motion.div
-                        key={ci}
-                        initial={{ scaleX: 0 }}
-                        animate={inView ? { scaleX: 1 } : {}}
-                        transition={{
-                          duration: 0.6,
-                          delay: 0.5 + ti * 0.08 + ci * 0.06,
-                        }}
-                        style={{
-                          position: "absolute",
-                          left: `${start * 100}%`,
-                          width: `${(0.15 + ci * 0.03) * 100}%`,
-                          top: 2,
-                          bottom: 2,
-                          background: `${track.color}22`,
-                          border: `1px solid ${track.color}66`,
-                          borderRadius: 2,
-                          transformOrigin: "left",
-                        }}
-                      />
-                    ))}
-                    {/* Playhead */}
-                    {playing && (
-                      <motion.div
-                        initial={{ left: "0%" }}
-                        animate={{ left: "100%" }}
-                        transition={{ duration: 4, ease: "linear" }}
-                        style={{
-                          position: "absolute",
-                          top: -4,
-                          bottom: -4,
-                          width: 2,
-                          background: "#fff",
-                          boxShadow: "0 0 6px rgba(255,255,255,0.8)",
-                        }}
-                      />
-                    )}
-                  </div>
-                </div>
-              ))}
-              {/* Timecode ruler */}
-              <div className="flex items-center gap-0 mt-1 ml-16">
-                {Array.from({ length: 11 }).map((_, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      flex: 1,
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "flex-start",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: 1,
-                        height: i % 5 === 0 ? 8 : 4,
-                        background: "rgba(255,255,255,0.2)",
-                      }}
-                    />
-                    {i % 5 === 0 && (
-                      <span
-                        style={{
-                          fontSize: "0.38rem",
-                          color: "rgba(255,255,255,0.2)",
-                          marginTop: 1,
-                        }}
-                      >
-                        {i * 5}s
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Play button + label */}
-            <div className="flex flex-col items-center gap-3">
-              <PlayButton onClick={() => setPlaying(!playing)} />
-              <span
-                style={{
-                  fontSize: "0.6rem",
-                  letterSpacing: "0.28em",
-                  color: "rgba(255,255,255,0.28)",
-                }}
-              >
-                {playing ? "PLAYING SHOWREEL..." : "CLICK TO PREVIEW SHOWREEL"}
-              </span>
-            </div>
-          </div>
-
-          {/* Corner labels */}
-          <div
-            className="absolute top-10 left-6"
-            style={{
-              fontSize: "0.5rem",
-              color: "rgba(57,255,20,0.4)",
-              letterSpacing: "0.15em",
-            }}
-          >
-            BEZLIAB GRAPHICS © 2026
-          </div>
-          <div className="absolute top-10 right-6 flex items-center gap-2">
-            <div
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: "50%",
-                background: "#ff4444",
-                animation: "pulse 1.5s infinite",
-              }}
-            />
+          <div className="flex items-center gap-3 mb-3">
             <span
               style={{
-                fontSize: "0.5rem",
-                color: "rgba(255,255,255,0.3)",
-                letterSpacing: "0.12em",
+                fontFamily: "Georgia,serif",
+                fontStyle: "italic",
+                fontWeight: 300,
+                fontSize: "clamp(1.1rem,2.2vw,1.6rem)",
+                color: "rgba(255,255,255,0.45)",
               }}
             >
-              HD 1080p
+              Video
             </span>
+            <span
+              style={{
+                fontSize: "clamp(1.1rem,2.2vw,1.6rem)",
+                fontWeight: 900,
+                letterSpacing: "-0.02em",
+                color: "#fff",
+              }}
+            >
+              Editing
+            </span>
+            <span
+              style={{
+                fontSize: "clamp(1.1rem,2.2vw,1.6rem)",
+                fontWeight: 900,
+                letterSpacing: "-0.02em",
+              }}
+              className="neon-text"
+            >
+              &amp; Motion
+            </span>
+            <div
+              style={{
+                flex: 1,
+                height: "1px",
+                background: "rgba(255,255,255,0.07)",
+                marginLeft: 8,
+              }}
+            />
           </div>
+          <p
+            style={{
+              fontSize: "clamp(0.78rem,1.4vw,0.95rem)",
+              color: "rgba(255,255,255,0.36)",
+              maxWidth: 520,
+              lineHeight: 1.72,
+            }}
+          >
+            Beyond static graphics — I bring brands to life through movement,
+            rhythm, and cinematic storytelling.
+          </p>
         </motion.div>
 
-        {/* ── Stats row ── */}
+        {/* ── Video gallery ── */}
+        {VIDEOS.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 22 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.7, delay: 0.1 }}
+            style={{ marginBottom: "clamp(2.5rem,5vw,4.5rem)" }}
+          >
+            {/* Single vertical reel: centred phone-frame style */}
+            {VIDEOS.length === 1 && VIDEOS[0].aspect === "9:16" && (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 20,
+                }}
+              >
+                <div style={{ maxWidth: 280, width: "100%" }}>
+                  <VideoCard v={VIDEOS[0]} onPlay={() => open(VIDEOS[0])} />
+                </div>
+                <p
+                  style={{
+                    fontSize: "0.62rem",
+                    letterSpacing: "0.22em",
+                    color: "rgba(255,255,255,0.22)",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  More videos coming soon · Google Drive uploads in progress
+                </p>
+              </div>
+            )}
+
+            {/* Multiple videos: responsive grid */}
+            {VIDEOS.length > 1 && (
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))",
+                  gap: "clamp(12px,2vw,20px)",
+                }}
+              >
+                {[...VIDEOS].map((v) => (
+                  <VideoCard key={v.id} v={v} onPlay={() => open(v)} />
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {/* ── Stats ── */}
         <motion.div
           initial={{ opacity: 0, y: 18 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.65, delay: 0.32 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16"
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.6, delay: 0.15 }}
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(2,1fr)",
+            gap: "clamp(10px,2vw,16px)",
+            marginBottom: "clamp(2.5rem,5vw,4rem)",
+          }}
+          className="md:grid-cols-4"
         >
-          {stats.map((s) => (
+          {STATS.map((s) => (
             <div
               key={s.label}
-              className="rounded-xl p-5 text-center"
               style={{
+                padding: "clamp(16px,2.5vw,24px)",
+                borderRadius: 14,
                 background: "rgba(57,255,20,0.04)",
                 border: "1px solid rgba(57,255,20,0.1)",
+                textAlign: "center",
               }}
             >
               <p
                 style={{
-                  fontSize: "clamp(1.5rem,3.5vw,2.5rem)",
+                  fontSize: "clamp(1.4rem,3.5vw,2.2rem)",
                   fontWeight: 900,
-                  color: "#39FF14",
-                  textShadow: "0 0 16px rgba(57,255,20,0.5)",
                   lineHeight: 1,
                 }}
+                className="neon-text"
               >
                 {s.n}
               </p>
@@ -427,38 +734,44 @@ export default function VideoEditingSection() {
           ))}
         </motion.div>
 
-        {/* ── Services grid ── */}
+        {/* ── Services ── */}
         <motion.div
           initial={{ opacity: 0, y: 22 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7, delay: 0.4 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-16"
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.65, delay: 0.2 }}
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))",
+            gap: "clamp(10px,1.8vw,16px)",
+            marginBottom: "clamp(2.5rem,5vw,4rem)",
+          }}
         >
-          {services.map((s, i) => (
+          {SERVICES.map((s, i) => (
             <motion.div
               key={s.title}
-              initial={{ opacity: 0, y: 18 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: 0.44 + i * 0.07 }}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.45, delay: 0.22 + i * 0.06 }}
               whileHover={{
                 y: -5,
-                borderColor: "rgba(57,255,20,0.28)",
+                borderColor: "rgba(57,255,20,0.25)",
                 boxShadow:
-                  "0 16px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(57,255,20,0.1)",
+                  "0 16px 36px rgba(0,0,0,0.55), 0 0 0 1px rgba(57,255,20,0.08)",
               }}
               style={{
-                padding: "24px",
-                borderRadius: 16,
+                padding: "clamp(18px,2.5vw,24px)",
+                borderRadius: 14,
                 background: "rgba(255,255,255,0.03)",
                 border: "1px solid rgba(255,255,255,0.06)",
-                cursor: "default",
                 transition: "all 0.3s ease",
               }}
             >
               <span
                 style={{
-                  fontSize: "1.6rem",
-                  marginBottom: 12,
+                  fontSize: "clamp(1.2rem,2.5vw,1.6rem)",
+                  marginBottom: 10,
                   display: "block",
                 }}
               >
@@ -466,10 +779,10 @@ export default function VideoEditingSection() {
               </span>
               <h3
                 style={{
-                  fontSize: "0.9rem",
+                  fontSize: "clamp(0.82rem,1.5vw,0.92rem)",
                   fontWeight: 700,
                   color: "white",
-                  marginBottom: 8,
+                  marginBottom: 7,
                   letterSpacing: "-0.01em",
                 }}
               >
@@ -477,8 +790,8 @@ export default function VideoEditingSection() {
               </h3>
               <p
                 style={{
-                  fontSize: "0.72rem",
-                  color: "rgba(255,255,255,0.42)",
+                  fontSize: "clamp(0.68rem,1.2vw,0.74rem)",
+                  color: "rgba(255,255,255,0.4)",
                   lineHeight: 1.72,
                 }}
               >
@@ -488,48 +801,50 @@ export default function VideoEditingSection() {
           ))}
         </motion.div>
 
-        {/* ── Tools I use ── */}
+        {/* ── Tools ── */}
         <motion.div
-          initial={{ opacity: 0, y: 18 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.65, delay: 0.55 }}
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.25 }}
+          style={{ marginBottom: "clamp(2rem,4vw,3rem)" }}
         >
           <p
             style={{
-              fontSize: "0.6rem",
+              fontSize: "0.58rem",
               letterSpacing: "0.28em",
-              color: "rgba(255,255,255,0.22)",
-              marginBottom: 16,
+              color: "rgba(255,255,255,0.2)",
+              marginBottom: 14,
             }}
           >
             MY VIDEO TOOLS
           </p>
-          <div className="flex flex-wrap gap-4 items-center">
-            {tools.map((t) => (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+            {TOOLS.map((t) => (
               <motion.div
                 key={t.label}
-                whileHover={{ scale: 1.08, y: -3 }}
+                whileHover={{ scale: 1.06, y: -2 }}
                 style={{
                   display: "flex",
                   alignItems: "center",
                   gap: 10,
-                  padding: "10px 18px",
+                  padding: "9px 18px",
                   borderRadius: 12,
                   background: t.bg,
                   border: `1px solid ${t.color}33`,
-                  cursor: "pointer",
+                  cursor: "default",
                 }}
               >
                 <span
                   style={{
-                    width: 32,
-                    height: 32,
+                    width: 30,
+                    height: 30,
                     borderRadius: 7,
                     background: `${t.color}22`,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    fontSize: "0.72rem",
+                    fontSize: "0.68rem",
                     fontWeight: 900,
                     color: t.color,
                   }}
@@ -538,8 +853,8 @@ export default function VideoEditingSection() {
                 </span>
                 <span
                   style={{
-                    fontSize: "0.7rem",
-                    color: "rgba(255,255,255,0.65)",
+                    fontSize: "0.68rem",
+                    color: "rgba(255,255,255,0.62)",
                     fontWeight: 600,
                   }}
                 >
@@ -550,50 +865,51 @@ export default function VideoEditingSection() {
           </div>
         </motion.div>
 
-        {/* CTA */}
+        {/* ── CTA ── */}
         <motion.div
           initial={{ opacity: 0 }}
-          animate={inView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.65, delay: 0.65 }}
-          className="mt-14 flex flex-col sm:flex-row items-center gap-4"
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 16,
+            flexWrap: "wrap",
+          }}
         >
           <motion.a
             href="mailto:boluwarin215@gmail.com"
             whileHover={{ boxShadow: "0 0 28px rgba(57,255,20,0.4)", y: -2 }}
             style={{
-              padding: "14px 36px",
+              padding: "13px 32px",
               border: "1.5px solid #39FF14",
               borderRadius: 50,
               background: "rgba(57,255,20,0.07)",
               color: "#39FF14",
               fontSize: "0.72rem",
               fontWeight: 700,
-              letterSpacing: "0.14em",
+              letterSpacing: "0.15em",
               cursor: "pointer",
               textDecoration: "none",
-              transition: "all 0.3s ease",
               display: "inline-flex",
               alignItems: "center",
               gap: 8,
+              transition: "all 0.3s ease",
             }}
           >
-            🎬 &nbsp;Hire Me for Video
+            🎬&nbsp; Hire Me for Video
           </motion.a>
-          <span
-            style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.28)" }}
-          >
-            or
-          </span>
           <a
             href="mailto:boluwarin215@gmail.com"
             style={{
-              fontSize: "0.7rem",
-              color: "rgba(255,255,255,0.45)",
+              fontSize: "0.68rem",
+              color: "rgba(255,255,255,0.38)",
               textDecoration: "underline",
               textUnderlineOffset: 3,
             }}
           >
-            Request a Showreel →
+            Request a showreel →
           </a>
         </motion.div>
       </div>
