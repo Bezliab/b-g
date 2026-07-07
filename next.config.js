@@ -1,9 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: "export", // produces a static /out folder GitHub Pages can serve
-  images: { unoptimized: true }, // required for static export (no image server)
-  basePath: "/b-g", // your repo name — this is a project page, not a root domain
-  assetPrefix: "/b-g/",
-  trailingSlash: true, // avoids 404s on GitHub Pages for nested routes
+  images: { unoptimized: true },
+  // Serve large video files
+  async headers() {
+    return [
+      {
+        source: "/videos/:path*",
+        headers: [
+          { key: "Accept-Ranges", value: "bytes" },
+          { key: "Cache-Control",  value: "public, max-age=31536000" },
+        ],
+      },
+    ];
+  },
 };
 module.exports = nextConfig;
