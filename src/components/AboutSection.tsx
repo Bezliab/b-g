@@ -13,9 +13,6 @@ const skills = [
   "Book Cover",
   "UI/UX Concepts",
   "Video Editing",
-  "Adobe Photoshop",
-  "Adobe Illustrator",
-  "After Effects",
 ];
 const tools = [
   { label: "Ps", color: "#31a8ff", bg: "#001e36" },
